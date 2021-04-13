@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:movie_app_flutter/utils/text.dart';
+import 'package:movie_app_flutter/widgets/toprated.dart';
+import 'package:movie_app_flutter/widgets/trending.dart';
+import 'package:movie_app_flutter/widgets/tv.dart';
 import 'package:tmdb_api/tmdb_api.dart';
 
 void main() => runApp(new MyApp());
@@ -23,50 +27,54 @@ class _HomeState extends State<Home> {
   final String apikey = '67af5e631dcbb4d0981b06996fcd47bc';
   final String readaccesstoken =
       'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2N2FmNWU2MzFkY2JiNGQwOTgxYjA2OTk2ZmNkNDdiYyIsInN1YiI6IjYwNzQ1OTA0ZjkyNTMyMDAyOTFmZDczYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.C_Bkz_T8OybTGo3HfYsESNjN46LBYdw3LHdF-1TzYYs';
+  List trendingmovies = [];
+  List topratedmovies = [];
+  List tv = [];
 
-  main() async {
-    // TMDB tmdb = TMDB(ApiKeys(apikey, readaccesstoken));
-    // print(await tmdb.v3.movies.getPouplar());
+  @override
+  void initState() {
+    super.initState();
+    loadmovies();
+  }
 
-    // TMDB tmdbWithLogs = TMDB(
-    //   ApiKeys(apikey, readaccesstoken),
-    //   logConfig: ConfigLogger.showAll(),
-    // );
-    // print(await tmdbWithLogs.v3.movies.getPouplar());
-
-    // TMDB tmdbWithCustomLogs = TMDB(
-    //   ApiKeys(apikey, readaccesstoken),
-    //   logConfig: ConfigLogger(
-    //     showLogs: true,
-    //     showErrorLogs: true,
-    //   ),
-    // );
-    // print(await tmdbWithCustomLogs.v3.movies.getPouplar());
+  loadmovies() async {
     TMDB tmdbWithCustomLogs = TMDB(
       ApiKeys(apikey, readaccesstoken),
       logConfig: ConfigLogger(
-        showLogs: true, //must be true than only all other logs will be shown
+        showLogs: true,
         showErrorLogs: true,
       ),
     );
 
-    Map result = await tmdbWithCustomLogs.v3.trending.getTrending();
-    print((result['results'][0]['adult']));
+    Map trendingresult = await tmdbWithCustomLogs.v3.trending.getTrending();
+    Map topratedresult = await tmdbWithCustomLogs.v3.movies.getTopRated();
+    Map tvresult = await tmdbWithCustomLogs.v3.tv.getPouplar();
+    print((tvresult));
+    setState(() {
+      trendingmovies = trendingresult['results'];
+      topratedmovies = topratedresult['results'];
+      tv = tvresult['results'];
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Flutter Movie App')),
-      body: Container(
-          child: TextButton(
-        child: Text('Show Movies'),
-        onPressed: () {
-          main();
-        },
-      )),
-    );
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: modified_text(text: 'Flutter Movie App ❤️'),
+          backgroundColor: Colors.transparent,
+        ),
+        body: ListView(
+          children: [
+            TV(tv: tv),
+            TrendingMovies(
+              trending: trendingmovies,
+            ),
+            TopRatedMovies(
+              toprated: topratedmovies,
+            ),
+          ],
+        ));
   }
 }
-
-// https://image.tmdb.org/t/p/w500/kqjL17yufvn9OVLyXYpvtyrFfak.jpg
